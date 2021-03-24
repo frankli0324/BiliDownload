@@ -1,0 +1,13 @@
+version: '3.5'
+services:
+  app:
+    build: .
+    image: frankli0324/bilibili-download
+    environment:
+      - BILI_SESSDATA=
+      - SECRET_KEY=
+      - BILI_WORKDIR=/workdir
+    volumes:
+      - ./output:/workdir
+    ports:
+      - 80:80

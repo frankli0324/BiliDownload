@@ -1,0 +1,8 @@
+venv/
+output/
+cache/
+__pycache__/
+.vscode/
+*.ipynb
+docker-compose.yml
+.gitignore

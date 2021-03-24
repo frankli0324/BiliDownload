@@ -15,9 +15,9 @@ from .event import get_event_source, get_queue, Event
 
 app = Flask(__name__)
 app.config['SESSDATA'] = os.getenv('BILI_SESSDATA')
-app.config['SECRET_KEY'] = 'aaa'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or os.urandom(16)
 app.config['CACHE_TYPE'] = 'FileSystemCache'
-app.config['CACHE_DIR'] = 'cache'
+app.config['CACHE_DIR'] = os.path.join(os.getenv('BILI_WORKDIR') or '.', 'cache')
 cache = Cache(app)
 
 
