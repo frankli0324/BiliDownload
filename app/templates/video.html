@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+<!-- -->
+{% block stylesheets %}
+<style>
+    .table th,
+    .table td {
+        vertical-align: middle;
+    }
+
+    .navbar-form {
+        margin-bottom: 0;
+        margin-top: 0;
+    }
+</style>
+{% endblock %}
+<!-- -->
+{% block scripts %}
+{% set parts=video['meta']['pages'] %}
+<script>
+    var source = new EventSource("/progress");
+    source.onerror = (e) => console.error(e)
+    let meta = {{ parts | tojson }};
+    function do_download(part) {
+        function listener(event) {
+            let progress = document.getElementById(`progress-${part['page']}`);
+            let label = progress.lastChild;
+            progress.style = `width: ${event.data}%`;
+            progress.setAttribute('aria-valuenow', event.data);
+            label.textContent = `${event.data}%`
+
+            if (event.data == 100)
+                source.removeEventListener(`progress-${part['page']}`, listener)
+        }
+        source.addEventListener(`progress-${part['page']}`, listener)
+    }
+    function download(part) {
+        for (let p of meta) {
+            if (part === undefined || part === p['page'])
+                do_download(p)
+        }
+    }
+</script>
+{% endblock %}
+<!-- -->
+{% block content %}
+<div class="row">
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                <table class="table">
+                    <caption>
+                        视频分P
+                        <button class="btn btn-outline-primary download-all" onclick="download()">
+                            全部下载
+                        </button>
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">下载</th>
+                            {#
+                            <th scope="col">画质</th>
+                            #}
+                            <th scope="col" width="30%">标题</th>
+                            <th scope="col" width="50%">进度</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p, info in video['parts'].items() %}
+                        <tr>
+                            <td scope="row">{{ p }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="download({{ p }})"
+                                    data-cid="{{ info['cid'] }}">
+                                    下载
+                                </button>
+                            </td>
+                            {#
+                            <td></td>
+                            #}
+                            <td>{{ info['meta']['part'] }}</td>
+                            <td>
+                                <div class="progress" style="width: 100%">
+                                    <div class="progress-bar progress-bar-striped active" id="progress-{{ p }}"
+                                        role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+                                        style="width: 0%">
+                                        <span class="progress-bar-label"></span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ video['meta']['title'] }}</h5>
+                <p class="card-text">{{ video['meta']['desc'] }}</p>
+                <p class="card-text">
+                    <small class="text-muted">{{ video['meta']['pubdate'] | ctime }}</small>
+                </p>
+            </div>
+            <img class="card-img-top" src="{{ video['meta']['pic'] }}" referrerpolicy="no-referrer" />
+        </div>
+    </div>
+</div>
+{% endblock %}
