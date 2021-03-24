@@ -27,12 +27,16 @@ class LazyDict(dict):
         return len(self._raw_dict)
 
 
-def download_progress(total_bytes, stream, filename):
+def download_progress(total_bytes, stream, filename, callback=None):
     block_size = 512  # 1 Kibibyte
     progress_bar = tqdm(total=total_bytes, unit='iB', unit_scale=True)
+    current = 0
     with open(filename, 'wb') as file:
         # shutil.copyfileobj(response.raw, file, length=total_bytes)
         for data in stream(block_size):
+            if callback:
+                current += len(data)
+                callback(current / total_bytes)
             progress_bar.update(len(data))
             file.write(data)
     progress_bar.close()

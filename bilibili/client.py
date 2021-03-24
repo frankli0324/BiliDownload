@@ -4,7 +4,7 @@ import shutil
 
 from requests import Session
 
-from .utils import LazyDict, download_progress
+from .utils import LazyDict
 
 
 class BiliSession(Session):
@@ -67,31 +67,3 @@ class BiliSession(Session):
         #     shutil.copyfileobj(response.raw, file, length=total_bytes)
         total_bytes = int(response.headers.get('content-length', 0))
         return total_bytes, response.iter_content
-
-    def download(self, video, part, quality=None):
-        part_meta, bvid = video['parts'][part], video['bvid']
-        if not quality:
-            quality = max(
-                part_meta['qualities']['meta']['accept_quality']
-            )
-        stream_meta = part_meta['qualities'][quality]['stream']
-        if 'dash' in stream_meta:
-            import os, ffmpeg
-            os.makedirs(f'./output/{bvid}-{part}', exist_ok=True)
-            total, stream = self.get_stream(
-                bvid, stream_meta['dash']['audio'][0]['base_url']
-            )
-            download_progress(total, stream, f'./output/{bvid}-{part}/audio_track')
-            total, stream = self.get_stream(
-                bvid, stream_meta['dash']['video'][0]['base_url']
-            )
-            download_progress(total, stream, f'./output/{bvid}-{part}/video_track')
-            audio = ffmpeg.input(f'./output/{bvid}-{part}/audio_track')
-            video = ffmpeg.input(f'./output/{bvid}-{part}/video_track')
-            out = ffmpeg.output(
-                video, audio, f'./{bvid}-{part}.mp4',
-                vcodec="copy", acodec="copy",
-                strict='experimental')
-            out.global_args('-loglevel', 'warning', '-stats').run()
-        # downloader = DashDownloader()
-        # downloader.download(part)

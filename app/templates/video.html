@@ -20,18 +20,25 @@
     var source = new EventSource("/progress");
     source.onerror = (e) => console.error(e)
     let meta = {{ parts | tojson }};
-    function do_download(part) {
-        function listener(event) {
-            let progress = document.getElementById(`progress-${part['page']}`);
-            let label = progress.lastChild;
-            progress.style = `width: ${event.data}%`;
-            progress.setAttribute('aria-valuenow', event.data);
-            label.textContent = `${event.data}%`
 
+    function progress(id, percentage) {
+        let bar = document.getElementById(id);
+        let label = bar.lastChild;
+        bar.style = `width: ${percentage}%`;
+        bar.setAttribute('aria-valuenow', percentage);
+        label.textContent = `${percentage}%`
+    }
+
+    async function do_download(part) {
+        function listener(event) {
+            progress(event.type, event.data);
             if (event.data == 100)
-                source.removeEventListener(`progress-${part['page']}`, listener)
+                source.removeEventListener(`progress-${part['page']}`, listener);
         }
-        source.addEventListener(`progress-${part['page']}`, listener)
+        source.addEventListener(`progress-${part['page']}`, listener);
+        // await _download_file(`progress-${part['page']}`, 'download/' + part['page']);
+        await fetch('download/' + part['page'])
+        open('retrieve/' + part['page'], '_blank');
     }
     function download(part) {
         for (let p of meta) {
@@ -50,9 +57,9 @@
                 <table class="table">
                     <caption>
                         视频分P
-                        <button class="btn btn-outline-primary download-all" onclick="download()">
+                        <!-- <button class="btn btn-outline-primary download-all" onclick="download()">
                             全部下载
-                        </button>
+                        </button> -->
                     </caption>
                     <thead>
                         <tr>
