@@ -66,7 +66,7 @@ def download(bvid, part):
         if progress != last:
             queue.put(Event(f'progress-{part}', progress))
             last = progress
-    output_path = os.path.join(os.getenv('BILI_WORKDIR'), f'{bvid}-{part}.mp4')
+    output_path = os.path.join(os.getenv('BILI_OUTDIR'), f'{bvid}-{part}.mp4')
     if not os.path.exists(output_path):
         part_meta = video['parts'][part]
         if not (quality := request.args.get('quality', None)):
@@ -87,7 +87,7 @@ def download(bvid, part):
 
 @app.route('/video/<string:bvid>/retrieve/<int:part>')
 def retrieve(bvid, part):
-    output_path = os.path.join(os.getenv('BILI_WORKDIR'), f'{bvid}-{part}.mp4')
+    output_path = os.path.join(os.getenv('BILI_OUTDIR'), f'{bvid}-{part}.mp4')
     return send_file(output_path, as_attachment=True)
 
 

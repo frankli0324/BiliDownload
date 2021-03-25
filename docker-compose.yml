@@ -7,7 +7,9 @@ services:
       - BILI_SESSDATA=
       - SECRET_KEY=
       - BILI_WORKDIR=/workdir
+      - BILI_OUTDIR=/output
     volumes:
-      - ./output:/workdir
+      - ./output:/output
+      - ./workdir:/workdir
     ports:
       - 80:80
