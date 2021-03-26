@@ -4,12 +4,23 @@ services:
     build: .
     image: frankli0324/bilibili-download
     environment:
-      - BILI_SESSDATA=
       - SECRET_KEY=
+      - BILI_SESSDATA=
       - BILI_WORKDIR=/workdir
-      - BILI_OUTDIR=/output
+      - STORAGE_TYPE=local
+      # local, alioss
+
+      - ALI_ACCESSID=
+      - ALI_SECRET=
+      - ALI_BUCKETID=
+      - ALI_ENDPOINT=https://oss-cn-beijing-internal.aliyuncs.com
+
+      - LOCAL_BASEDIR=/opt/app/static
+      - LOCAL_BASEURL=/static/
+      # this is passed to werkzeug.urls.url_join, the tailing '/' is necessary
     volumes:
-      - ./output:/output
-      - ./workdir:/workdir
+      - /mnt/oss:/output
+      - ./data/workdir:/workdir
+      - ./data/static:/opt/app/static
     ports:
-      - 80:80
+      - 127.0.0.1:8080:80
